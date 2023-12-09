@@ -1,5 +1,6 @@
 package com.aryanto.githubuser.ui.activity.main
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -8,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.aryanto.githubuser.Item
 import com.aryanto.githubuser.R
 import com.aryanto.githubuser.data.remote.network.RetrofitInstance
+import com.aryanto.githubuser.ui.activity.detail.DetailActivity
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -22,7 +24,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        adapter = MainAdapter(emptyList())
+        adapter = MainAdapter(emptyList()){item ->
+            showDetails(item)
+        }
 
         recyclerView = findViewById(R.id.rv_main)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -40,7 +44,9 @@ class MainActivity : AppCompatActivity() {
                 if (response.isSuccessful){
                     val users: List<Item>? = response.body()
                     users?.let {
-                        adapter = MainAdapter(it)
+                        adapter = MainAdapter(it){item ->
+                            showDetails(item)
+                        }
                         recyclerView.adapter= adapter
                     }
                 }
@@ -49,5 +55,11 @@ class MainActivity : AppCompatActivity() {
                 Log.e("LOG", "Error: ${t.message}")
             }
         })
+    }
+
+    private fun showDetails(item: Item){
+        val intent = Intent(this, DetailActivity::class.java)
+        intent.putExtra("username", item.login)
+        startActivity(intent)
     }
 }

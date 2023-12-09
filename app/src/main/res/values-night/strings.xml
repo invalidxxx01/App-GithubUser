@@ -4,4 +4,12 @@
     <string name="no_user_found">No user found</string>
     <string name="image_view">Image View</string>
     <string name="name">Name</string>
+    <string name="username">Username</string>
+    <string name="image_detail_users">Image detail users</string>
+    <string name="image_label_follower">Image label follower</string>
+    <string name="image_label_following">Image label following</string>
+    <string name="_0">0</string>
+    <string name="followers">Followers</string>
+    <string name="following">Following</string>
+    <string name="tab_layout_descriptions">Tab layout descriptions</string>
 </resources>
