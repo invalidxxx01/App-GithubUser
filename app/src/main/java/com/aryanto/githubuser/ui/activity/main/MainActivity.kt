@@ -4,12 +4,16 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.inputmethod.EditorInfo
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.aryanto.githubuser.Item
 import com.aryanto.githubuser.R
+import com.aryanto.githubuser.ResponseGithub
 import com.aryanto.githubuser.data.remote.network.RetrofitInstance
 import com.aryanto.githubuser.ui.activity.detail.DetailActivity
+import com.google.android.material.search.SearchBar
+import com.google.android.material.search.SearchView
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -18,6 +22,8 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var adapter: MainAdapter
     private lateinit var recyclerView: RecyclerView
+    private lateinit var searchBar: SearchBar
+    private lateinit var searchView: SearchView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -30,10 +36,13 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = adapter
 
+        searchBar = findViewById(R.id.search_bar_material)
+        searchView = findViewById(R.id.search_view_material)
+
         getUsers()
+        setSearch()
 
     }
-
     private fun getUsers() {
         val call: Call<List<Item>> = RetrofitInstance.serviceApi.getUser()
 
@@ -54,10 +63,48 @@ class MainActivity : AppCompatActivity() {
             }
         })
     }
-
     private fun showDetails(item: Item){
         val intent = Intent(this, DetailActivity::class.java)
         intent.putExtra("username", item.login)
         startActivity(intent)
     }
+    private fun setSearch(){
+        searchView.setupWithSearchBar(searchBar)
+        searchView.editText.setOnEditorActionListener { v, actionId, event ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH){
+                val searchText = v.text.toString()
+                searchView.hide()
+                performSearch(searchText)
+                true
+            } else {
+                false
+            }
+        }
+    }
+    private fun performSearch(query: String) {
+        val call: Call<ResponseGithub> = RetrofitInstance.serviceApi.searchUser(query)
+
+        call.enqueue(object : Callback<ResponseGithub>{
+            override fun onResponse(
+                call: Call<ResponseGithub>,
+                response: Response<ResponseGithub>
+            ) {
+                if (response.isSuccessful){
+                    val searchResults: ResponseGithub? = response.body()
+
+                    searchResults?.let {
+                        adapter.setData(it.items)
+                        recyclerView.scrollToPosition(0)
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseGithub>, t: Throwable) {
+                Log.e("LOG", "Search Error: ${t.message}")
+            }
+
+        })
+    }
+
+
 }
