@@ -12,4 +12,6 @@
     <string name="followers">Followers</string>
     <string name="following">Following</string>
     <string name="tab_layout_descriptions">Tab layout descriptions</string>
+    <string name="no_user_followed">No user followed</string>
+    <string name="no_user_following">No user following</string>
 </resources>
